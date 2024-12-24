@@ -10,6 +10,7 @@ int main()
     int n, k, kc, ke, NSTEPS;
     float T;
     float t0, spread, pulse;
+    float ex_low_m2, ex_low_m1, ex_high_m2, ex_high_m1;
     FILE *fp;
 
     /*Initialize*/
@@ -47,6 +48,16 @@ while ( NSTEPS > 0 ){
         pulse = exp(-.5*(pow( (t0-T)/spread, 2.0) ));
         ex[kc] = pulse;
         printf( "%5.1f %6.2f\n", t0-T, ex[kc]);
+
+            /* Absorbing Boundary Conditions*/
+
+            ex[0] = ex_low_m2;
+            ex_low_m2 = ex_low_m1;
+            ex_low_m1 = ex[1];
+
+            ex[KE-1] = ex_high_m2;
+            ex_high_m2 = ex_high_m1;
+            ex_high_m1 = ex[KE-2];
 
         /*Calculate the Hy field */
         for ( k=0; k< KE-1; k++ )
