@@ -3,7 +3,7 @@
 # include <stdio.h>
 
 # define KE 200    /*KE is the number of cells to be used*/ 
-#define PI 3.14159265358979323846
+# define PI 3.14159265358979323846
 
 int main()
 {
@@ -12,13 +12,13 @@ int main()
     float T;
     float t0, spread, pulse;
     float ex_low_m2, ex_low_m1, ex_high_m2, ex_high_m1;
-    float cb[KE];
-    float ddx, dt, epsz, epsilon, sigma, eaf, freq_in;
+    float cb[KE], ca[KE], epsz;
+    float ddx, dt, epsilon, sigma, eaf, freq_in;
     FILE *fp;
 
     /*Initialize*/
 
-    for ( k=1; k <= KE; k++ )
+    for ( k=0; k < KE; k++ )
     {
         ex[k] = 0;
         hy[k] = 0;
@@ -29,6 +29,7 @@ int main()
     spread = 12;    /*Width of the incident pulse*/
     ddx = .01;    /* Set the cell size to 1cm */
     dt = ddx/(2*3e8);    /* Calculate the time step */
+    epsz = 8.85419e-12;
     T = 0;
     NSTEPS = 1;
 
@@ -39,19 +40,26 @@ int main()
     printf(" %8.0f \n", freq_in);
 
     for ( k=1; k <= KE; k++ ){
-        cb[k] = 0.5;    /*Initialize to free space*/
+        ca[k] = 1.;
+        cb[k] = .5;    /*Initialize to free space*/
     }
         printf( "Dielectric starts at --> ");
         scanf("%d", &kstart);
         printf( "Epsilon --> ");
         scanf("%f", &epsilon);
-        printf("%d %6.2f \n", kstart, epsilon);
-    
+        printf( "Conductivity --> ");
+        scanf("%f", &sigma);
+        printf("%d %6.2f %6.2f \n", kstart, epsilon, sigma);
+
+        eaf = dt*sigma/(2*epsz*epsilon);
+        printf(" %6.4f \n", eaf );
+
     for ( k=kstart; k <= KE; k++){
-        cb[k] = .5/epsilon;
+        ca[k] = (1. - eaf)/(1 + eaf);
+        cb[k] = .5/(epsilon*(1 + eaf) );
     }
         for ( k=1; k <= KE; k++ )
-        { printf( "%2d %4.2f\n", k, cb[k]);}
+        { printf( "%2d %4.2f %4.2f \n", k, ca[k], cb[k]);}
     
 while ( NSTEPS > 0 ){
     printf( "NSTEPS --> " );    /*NSTEPS is the number of times the main loop has exected*/
@@ -67,7 +75,7 @@ while ( NSTEPS > 0 ){
         
         /*Calculated the Ex field*/
         for ( k=1; k < KE; k++ )
-        { ex[k] = ex[k] + cb[k]*( hy[k-1] - hy[k] ); }
+        { ex[k] = ca[k]*ex[k] + cb[k]*( hy[k-1] - hy[k] ); }
 
         /*Put a Gaussian pulse in the middle */
 
@@ -77,13 +85,15 @@ while ( NSTEPS > 0 ){
 
             /* Absorbing Boundary Conditions*/
 
-            ex[0] = ex_low_m2;
-            ex_low_m2 = ex_low_m1;
-            ex_low_m1 = ex[1];
+            
+                ex[0] = ex_low_m2;
+                ex_low_m2 = ex_low_m1;
+                ex_low_m1 = ex[1];
 
-            ex[KE-1] = ex_high_m2;
-            ex_high_m2 = ex_high_m1;
-            ex_high_m1 = ex[KE-2];
+                ex[KE-1] = ex_high_m2;
+                ex_high_m2 = ex_high_m1;
+                ex_high_m1 = ex[KE-2];
+            
 
         /*Calculate the Hy field */
         for ( k=0; k < KE-1; k++ )
