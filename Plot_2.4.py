@@ -15,18 +15,18 @@ process = subprocess.Popen(c_program, shell=True)
 
 # 初始化绘图
 plt.ion()  # 开启交互模式
-fig, axes = plt.subplots(2, 1, figsize=(10, 8))  # 两个子图：Ex 和 Amp 数据
+fig, ax = plt.subplots() # Ex 
 
 # 上图：Ex-k
-ex_line, = axes[0].plot([], [], 'b-', label='Ex-k')  # 蓝线表示 Ex-k
-axes[0].set_ylim(-1.0, 1.0)  # 根据 Ex 值范围设置
-axes[0].set_xlim(0, 200)  # 假设 k 范围是 0 到 200
-axes[0].set_xlabel("k")
-axes[0].set_ylabel("Ex")
-axes[0].set_title("Real-time Ex-k Plot")
-axes[0].legend()
+line, = ax.plot([], [], 'b-', label='Ex-k')  # 蓝线表示 Ex-k
+ax.set_ylim(-2.0, 2.0)  # 根据 Ex 值范围设置
+ax.set_xlim(0, 2000)  # 假设 k 范围是 0 到 200
+ax.set_xlabel("k")
+ax.set_ylabel("Ex")
+ax.set_title("Real-time Ex-k Plot")
+ax.legend()
 
-# 下图：Amp0、Amp1、Amp2-k
+'''# 下图：Amp0、Amp1、Amp2-k
 amp0_line, = axes[1].plot([], [], 'r-', label='Amp0-k')  # 红线表示 Amp0-k
 amp1_line, = axes[1].plot([], [], 'g-', label='Amp1-k')  # 绿线表示 Amp1-k
 amp2_line, = axes[1].plot([], [], 'y-', label='Amp2-k')  # 黄线表示 Amp2-k
@@ -35,7 +35,7 @@ axes[1].set_xlim(0, 200)  # 假设 k 范围是 0 到 200
 axes[1].set_xlabel("k")
 axes[1].set_ylabel("Amplitude")
 axes[1].set_title("Real-time Amp-k Plot")
-axes[1].legend()
+axes[1].legend()'''
 
 try:
     while True:
@@ -45,7 +45,7 @@ try:
             k_ex = ex_data[:, 0]  # 第一列是 k
             ex = ex_data[:, 1]  # 第二列是 Ex 值
 
-            # 读取 Amp 数据
+            '''# 读取 Amp 数据
             amp0_data = np.loadtxt(amp0_file)  # 从文件读取 Amp0 数据
             amp1_data = np.loadtxt(amp1_file)  # 从文件读取 Amp1 数据
             amp2_data = np.loadtxt(amp2_file)  # 从文件读取 Amp2 数据
@@ -57,15 +57,15 @@ try:
             amp1 = amp1_data[:, 1]  # 第二列是 Amp1 值
 
             k_amp2 = amp2_data[:, 0]  # 第一列是 k
-            amp2 = amp2_data[:, 1]  # 第二列是 Amp2 值
+            amp2 = amp2_data[:, 1]  # 第二列是 Amp2 值'''
 
             # 更新 Ex-k 图像
-            ex_line.set_xdata(k_ex)
-            ex_line.set_ydata(ex)
-            axes[0].relim()
-            axes[0].autoscale_view()
+            line.set_xdata(k_ex)
+            line.set_ydata(ex)
+            ax.relim()
+            ax.autoscale_view()
 
-            # 更新 Amp-k 图像
+            ''' # 更新 Amp-k 图像
             amp0_line.set_xdata(k_amp0)
             amp0_line.set_ydata(amp0)
 
@@ -76,7 +76,7 @@ try:
             amp2_line.set_ydata(amp2)
 
             axes[1].relim()
-            axes[1].autoscale_view()
+            axes[1].autoscale_view()'''
 
             # 绘图
             plt.draw()

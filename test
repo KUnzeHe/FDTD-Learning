@@ -1,0 +1,11 @@
+# include <math.h>;
+
+float epsz;
+
+# define epsz = 8.8e-12;
+
+y = 0*pow(epsz,-1);
+
+int main(){
+    printf("%f", y);
+}

@@ -1,4 +1,4 @@
-/* FD1D_2.2.c. The Fourier Transform has been added.*/
+/* FD1D_2.3.c. The Fourier Transform has been added.*/
 
 #include <math.h>
 #include <stdlib.h>

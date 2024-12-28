@@ -1,16 +1,16 @@
-/* FD1D_2.2.c. The Fourier Transform has been added.*/
+/* FD1D_2.4.c. Plasma.*/
 
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-#define KE 200
+#define KE 2000
 
 int main ()
 {
     float dx[KE], ex[KE], hy[KE], ix[KE], sx[KE], sxm1[KE], sxm2[KE];
     float ga[KE], gb[KE], gc[KE];
-    int n, m, k, kc, ke, kstart, nsteps;
+    int n, m, k, kc, ke, kstart, nsteps, kend;
     float ddx, dt, T, epsz, epsilon, sigma, omega, vc, freq_p, freq_in;
     float t0, spread, pi, pulse;
     FILE *fp;
@@ -28,10 +28,10 @@ int main ()
     dt = ddx/6e8;             /* Time steps */
     printf(" %6.4f %10.5e \n", ddx, dt);
 
-    for (k=1; k < KE; k++) {  /* Initialize to free space */
-        /*ga[k] = 1.;
+    for (k=0; k < KE-1; k++) {  /* Initialize to free space */
+        ga[k] = 1.;
         gb[k] = 0.;
-        gc[k] = 0.;*/
+        gc[k] = 0.;
         dx[k] = 0.;
         ex[k] = 0.;
         hy[k] = 0.;
@@ -70,8 +70,10 @@ int main ()
         printf(" %2d %6.2f %7.5f \n", n, freq[n]*1e-6, arg[n]);
     }
 
-    printf("Dielectric starts at --> ");
+    printf("Plasma starts at --> ");
     scanf("%d", &kstart);
+    printf("Plasma ends at --> ");
+    scanf("%d", &kend);
     
     /* printf("Epsilon --> ");
     scanf("%f", &epsilon);
@@ -81,16 +83,16 @@ int main ()
 
     printf("Plasma frequency(THz) --> ");
     scanf("%f", &freq_p);
-        freq_p = freq_p;
+        freq_p = freq_p*1e12;
         omega = freq_p*2*pi;
 
     printf("Electron collision freq(THz) --> ");
     scanf("%f", &vc);
-    vc = vc;
+    vc = vc*1e12;
 
     printf( "Input freq(THz) --> " );
     scanf("%f", &freq_in);
-    freq_in = freq_in;
+    freq_in = freq_in*1e12;
 
     /*printf(" chil --> ");
     scanf("%f", &chil);
@@ -101,7 +103,7 @@ int main ()
             del_exp = exp(-dt/tau);
     }*/
 
-    printf("%d %6.2f %6.2f %6.2f\n", kstart, freq_p, omega, vc);
+    printf("%d %d %6.2f %6.2f %6.2f\n", kstart, kend, freq_p, omega, vc);
 
     /*tau = 1.e-6*tau;
     { printf( "del_exp = %8.5f \n", del_exp); }*/
@@ -138,6 +140,7 @@ int main ()
             /* Calculate the Dx field */
             for (k=0; k < KE; k++) {
                 dx[k] = dx[k] + 0.5*(hy[k-1] - hy[k]);
+                
             }
 
             /* Initialize with a pulse */
@@ -147,11 +150,20 @@ int main ()
             printf(" %5.1f %6.2f %6.2f \n", T, pulse, dx[5]);
 
             /* Calculate Ex from Dx */
-            for (k=0; k < KE-1; k++) {
-                ex[k] = dx[k] - sx[k];
-                sx[k] = (1 + exp(-vc*dt)*sxm1[k] - exp(-vc*dt)*sxm2[k] + (pow(omega, 2.)*dt/vc)*(1 - exp(-vc*dt))*ex[k]);
-                sxm2[k] = sxm1[k];
-                sxm1[k] = sx[k];
+            for (k=0; k < KE-1; k++){
+
+                if (kstart <= k && k <= kend ){
+                    ex[k] = dx[k] - sx[k];
+                    sx[k] = (1 + exp(-vc*dt))*sxm1[k] - exp(-vc*dt)*sxm2[k] + (pow(omega, 2.)*dt/vc)*(1 - exp(-vc*dt))*ex[k];
+                    sxm2[k] = sxm1[k];
+                    sxm1[k] = sx[k];
+                    }
+
+                else{
+                    /*printf("%d Dx = %f\n", k, dx[k]);*/
+                    ex[k] = dx[k];
+                    /*printf("Ex = %f\n", ex[k]);*/
+                }
             }
 
             /* Calculate the Fourier transform of Ex */
@@ -201,10 +213,10 @@ int main ()
         /* Calculate the amplitude and phase of each frequency */
 
         /* Amplitude and phase of the input pulse */
-        for (m=0; m <= 2; m++) {
+        /*for (m=0; m <= 2; m++) {
             amp_in[m] = sqrt( pow(imag_in[m],2.) + pow(real_in[m],2.) );
             phase_in[m] = atan2( imag_in[m], real_in[m] );
-            printf(" %3d Input Pulse : %8.4f %8.4f %8.4f %7.2f\n", m, real_in[m], imag_in[m], amp_in[m], (180.0/pi)*phase_in[m]);
+            printf(" %3d Input Pulse : %8.4f %8.4f %8.4f %7.2f\n", m, real_in[m], imag_in[m], amp_in[m], (180.0/pi)*phase_in[m]);*/
         
 
             for (k=1; k < KE; k++) {
@@ -233,6 +245,6 @@ int main ()
             fclose(fp);
 
             printf("%5.1f \n", T);
-        }
     }
 }
+
